@@ -46,65 +46,10 @@
   <div id="map"></div>
 
   <script src="config.js"></script>
+  <script src="vor-data.js"></script>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script>
-    const API_BASE = window.APP_CONFIG.API_BASE;
-    const ENDPOINT = `${API_BASE}/intersect`;
-
-    const map = L.map('map').setView([53.55, -2.6], 8);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
-
-    let drawn = [];
-    function clearMap() {
-      drawn.forEach(x => map.removeLayer(x));
-      drawn = [];
-    }
-
-    function num(id) {
-      const v = parseFloat(document.getElementById(id).value);
-      if (Number.isNaN(v)) throw new Error(`Invalid number in ${id}`);
-      return v;
-    }
-
-    document.getElementById('go').addEventListener('click', async () => {
-      clearMap();
-      out.textContent = "Calling API…";
-
-      try {
-        const params = new URLSearchParams({
-          p1lat: num("p1lat"), p1lon: num("p1lon"), brg1: num("brg1"),
-          p2lat: num("p2lat"), p2lon: num("p2lon"), brg2: num("brg2"),
-        });
-
-        const url = `${ENDPOINT}?${params.toString()}`;
-        const res = await fetch(url);
-        const data = await res.json();
-
-        out.textContent = JSON.stringify(data, null, 2);
-
-        const p1 = data.input.p1;
-        const p2 = data.input.p2;
-        const [s1, s2] = data.solutions;
-
-        const m1 = L.marker([p1.lat, p1.lon]).bindPopup("Station 1").addTo(map);
-        const m2 = L.marker([p2.lat, p2.lon]).bindPopup("Station 2").addTo(map);
-
-        const i1 = L.circleMarker([s1.lat, s1.lon], { radius: 7 }).bindPopup("Solution A").addTo(map);
-        const i2 = L.circleMarker([s2.lat, s2.lon], { radius: 7 }).bindPopup("Solution B").addTo(map);
-
-        drawn.push(m1, m2, i1, i2);
-
-        map.fitBounds([
-          [p1.lat, p1.lon],
-          [p2.lat, p2.lon],
-          [s1.lat, s1.lon],
-          [s2.lat, s2.lon]
-        ], { padding: [30, 30] });
-
-      } catch (err) {
-        out.textContent = `Error: ${err.message}`;
-      }
-    });
-  </script>
+  <script src="common.js"></script>
+  <script src="intersect.js"></script>
+  
 </body>
 </html>
