@@ -22,23 +22,23 @@
   <h1>Radial intersection</h1>
   <div class="row">
     <div class="panel">
-      <h3>Station 1</h3>
-      <label>Lat</label><input id="p1lat" value="53.391899">
-      <label>Lon</label><input id="p1lon" value="-3.134440">
-      <label>Bearing (deg)</label><input id="brg1" value="90">
+      <h3>VOR1</h3>
+      <label>VOR1</label>
+      <select id="vor1"></select>
+      <label>Radial</label><input id="brg1" type="number" min="0" max="360" step="1" value="90">
     </div>
-
+    
     <div class="panel">
-      <h3>Station 2</h3>
-      <label>Lat</label><input id="p2lat" value="53.743900">
-      <label>Lon</label><input id="p2lon" value="-2.103330">
-      <label>Bearing (deg)</label><input id="brg2" value="210">
+      <h3>VOR2</h3>
+      <label>VOR2</label>
+      <select id="vor2"></select>
+      <label>Radial</label><input id="brg2" type="number" min="0" max="360" step="1" value="210">
     </div>
 
     <div class="panel">
       <h3>Compute</h3>
       <button id="go">Find intersection</button>
-      <div class="hint">You’ll get two solutions (antipodal). Usually only one is “the one you mean”.</div>
+      <div class="hint">You’ll get two solutions. Usually only one is “the one you mean”.</div>
       <pre id="out">Ready.</pre>
     </div>
   </div>
