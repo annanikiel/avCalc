@@ -37,29 +37,51 @@
   //   return v;
   // }
 
-  function createMap(mapDivId, initialLat = 53.55, initialLon = -2.6, initialZoom = 8) {
-    const map = L.map(mapDivId).setView([initialLat, initialLon], initialZoom);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
+function createMap(
+  mapDivId,
+  initialLat = 53.55,
+  initialLon = -2.6,
+  initialZoom = 6
+) {
+  const UK_BOUNDS = L.latLngBounds(
+    [49.5, -9.5],   // SW
+    [61.0,  2.5]    // NE
+  );
 
-    const state = { map, layers: [] };
+  const map = L.map(mapDivId, {
+    maxBounds: UK_BOUNDS,
+    maxBoundsViscosity: 1.0,  // fully clamps panning
+    minZoom: 5,
+    maxZoom: 12
+  }).setView([initialLat, initialLon], initialZoom);
 
-    state.clear = () => {
-      state.layers.forEach(l => map.removeLayer(l));
-      state.layers = [];
-    };
+  L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    { maxZoom: 18 }
+  ).addTo(map);
 
-    state.add = (layer) => {
-      layer.addTo(map);
-      state.layers.push(layer);
-      return layer;
-    };
+  const state = { map, layers: [] };
 
-    state.fitTo = (latlonPairs) => {
-      map.fitBounds(latlonPairs, { padding: [30, 30] });
-    };
+  state.clear = () => {
+    state.layers.forEach(l => map.removeLayer(l));
+    state.layers = [];
+  };
 
-    return state;
-  }
+  state.add = (layer) => {
+    layer.addTo(map);
+    state.layers.push(layer);
+    return layer;
+  };
+
+  state.fitTo = (latlonPairs) => {
+    map.fitBounds(latlonPairs, {
+      padding: [30, 30],
+      maxZoom: 10      // prevents zooming in absurdly on tight fixes
+    });
+  };
+
+  return state;
+}
 
   async function apiGet(path, params) {
     const base = window.APP_CONFIG?.API_BASE;
