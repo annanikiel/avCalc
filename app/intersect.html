@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Radial Intersection</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+  <style>
+    body { font-family: system-ui; margin: 1.5rem; max-width: 920px; }
+    .row { display:flex; gap:1rem; flex-wrap:wrap; }
+    .panel { flex: 1 1 320px; }
+    label { display:block; font-size: 0.9rem; margin-top: 0.6rem; }
+    input { width: 100%; padding: 0.5rem; border:1px solid #ccc; border-radius:10px; }
+    button { margin-top: 1rem; padding: 0.6rem 0.9rem; border:0; border-radius:10px; cursor:pointer; }
+    #map { height: 460px; border-radius: 14px; margin-top: 1rem; }
+    pre { background:#f6f6f6; padding: 0.75rem; border-radius: 12px; overflow:auto; }
+    .hint { color:#666; font-size:0.9rem; margin-top:0.5rem; }
+  </style>
+</head>
+<body>
+  <a href="index.html">← Back</a>
+  <h1>Radial intersection</h1>
+  <div class="row">
+    <div class="panel">
+      <h3>Station 1</h3>
+      <label>Lat</label><input id="p1lat" value="53.391899">
+      <label>Lon</label><input id="p1lon" value="-3.134440">
+      <label>Bearing (deg)</label><input id="brg1" value="90">
+    </div>
+
+    <div class="panel">
+      <h3>Station 2</h3>
+      <label>Lat</label><input id="p2lat" value="53.743900">
+      <label>Lon</label><input id="p2lon" value="-2.103330">
+      <label>Bearing (deg)</label><input id="brg2" value="210">
+    </div>
+
+    <div class="panel">
+      <h3>Compute</h3>
+      <button id="go">Find intersection</button>
+      <div class="hint">You’ll get two solutions (antipodal). Usually only one is “the one you mean”.</div>
+      <pre id="out">Ready.</pre>
+    </div>
+  </div>
+
+  <div id="map"></div>
+
+  <script src="config.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const API_BASE = window.APP_CONFIG.API_BASE;
+    const ENDPOINT = `${API_BASE}/intersect`;
+
+    const map = L.map('map').setView([53.55, -2.6], 8);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
+
+    let drawn = [];
+    function clearMap() {
+      drawn.forEach(x => map.removeLayer(x));
+      drawn = [];
+    }
+
+    function num(id) {
+      const v = parseFloat(document.getElementById(id).value);
+      if (Number.isNaN(v)) throw new Error(`Invalid number in ${id}`);
+      return v;
+    }
+
+    document.getElementById('go').addEventListener('click', async () => {
+      clearMap();
+      out.textContent = "Calling API…";
+
+      try {
+        const params = new URLSearchParams({
+          p1lat: num("p1lat"), p1lon: num("p1lon"), brg1: num("brg1"),
+          p2lat: num("p2lat"), p2lon: num("p2lon"), brg2: num("brg2"),
+        });
+
+        const url = `${ENDPOINT}?${params.toString()}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        out.textContent = JSON.stringify(data, null, 2);
+
+        const p1 = data.input.p1;
+        const p2 = data.input.p2;
+        const [s1, s2] = data.solutions;
+
+        const m1 = L.marker([p1.lat, p1.lon]).bindPopup("Station 1").addTo(map);
+        const m2 = L.marker([p2.lat, p2.lon]).bindPopup("Station 2").addTo(map);
+
+        const i1 = L.circleMarker([s1.lat, s1.lon], { radius: 7 }).bindPopup("Solution A").addTo(map);
+        const i2 = L.circleMarker([s2.lat, s2.lon], { radius: 7 }).bindPopup("Solution B").addTo(map);
+
+        drawn.push(m1, m2, i1, i2);
+
+        map.fitBounds([
+          [p1.lat, p1.lon],
+          [p2.lat, p2.lon],
+          [s1.lat, s1.lon],
+          [s2.lat, s2.lon]
+        ], { padding: [30, 30] });
+
+      } catch (err) {
+        out.textContent = `Error: ${err.message}`;
+      }
+    });
+  </script>
+</body>
+</html>
