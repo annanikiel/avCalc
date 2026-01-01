@@ -11,16 +11,6 @@ let pointMarker = null;
 let vor1Marker = null;
 let vor2Marker = null;
 
-const pointIcon = L.icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  shadowSize: [41, 41],
-  className: "point-marker"
-});
-
 function num(id) {
   const v = Number(document.getElementById(id).value);
   if (!Number.isFinite(v)) throw new Error(`Invalid number in ${id}`);
@@ -40,9 +30,13 @@ function setPoint(lat, lon, pan = true) {
   document.getElementById("pLon").value = lon.toFixed(6);
 
   if (pointMarker) mapState.map.removeLayer(pointMarker);
-  pointMarker = L.marker([lat, lon], { icon: pointIcon })
-  .bindPopup("Point")
-  .addTo(mapState.map);
+  pointMarker = L.circleMarker([lat, lon], {
+    radius: 8,
+    color: "#d00000",      // outline colour
+    fillColor: "#ff4d4d",  // fill colour
+    fillOpacity: 0.9,
+    weight: 2
+  }).bindPopup("Point").addTo(mapState.map);
 
   if (pan) mapState.map.panTo([lat, lon]);
 }
