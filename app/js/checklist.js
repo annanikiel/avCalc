@@ -143,15 +143,15 @@ function createItem({ label, action }) {
   const row = document.createElement("div");
   row.className = "item";
 
-  row.innerHTML = `
-    <div class="left">
-      <div class="label">${label}</div>
-      <div class="action">${action}</div>
-    </div>
-    <div class="right">
-      <input type="checkbox" aria-label="${label} – ${action}">
-    </div>
-  `;
+   row.innerHTML = `
+     <div class="right">
+       <input type="checkbox" aria-label="${label} – ${action}">
+     </div>
+     <div class="left">
+       <div class="label">${label}</div>
+       <div class="action">${action}</div>
+     </div>
+   `;
 
   const checkbox = row.querySelector("input");
 
