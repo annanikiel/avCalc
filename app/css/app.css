@@ -125,3 +125,7 @@ input[type="checkbox"] {
   accent-color: #111;
   cursor: pointer;
 }
+
+.item input[type="checkbox"] {
+  margin-right: 0.25rem;
+}
