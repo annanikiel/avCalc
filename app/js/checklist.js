@@ -75,6 +75,15 @@ const CHECKLISTS = {
   }
 };
 
+const CHECKLIST_SEQUENCE = [
+  "internal",
+  "start",
+  "power_checks",
+  "pre_takeoff",
+  "after_landing",
+  "shutdown"
+];
+
 /* =========================
    Helpers
    ========================= */
@@ -116,6 +125,33 @@ function createItem({ label, action }) {
   return row;
 }
 
+function renderNextLink(currentName) {
+  const wrap = document.getElementById("nextWrap");
+  if (!wrap) return;
+
+  const idx = CHECKLIST_SEQUENCE.indexOf(currentName);
+  if (idx === -1) {
+    wrap.innerHTML = "";
+    return;
+  }
+
+  const nextName = CHECKLIST_SEQUENCE[idx + 1];
+  if (!nextName || !CHECKLISTS[nextName]) {
+    // End of sequence: show nothing (or show "Back to checklists" if you want)
+    wrap.innerHTML = `<a class="card" href="checklists.html"><strong>Back to checklists</strong></a>`;
+    return;
+  }
+
+  const nextTitle = CHECKLISTS[nextName].title;
+
+  wrap.innerHTML = `
+    <a class="card" href="checklist.html?name=${encodeURIComponent(nextName)}">
+      <strong>Next: ${nextTitle}</strong><br/>
+      <small>Continue to the next checklist</small>
+    </a>
+  `;
+}
+
 /* =========================
    Initialise
    ========================= */
@@ -139,6 +175,8 @@ if (!checklist) {
   checklist.items.forEach(item => {
     listEl.appendChild(createItem(item));
   });
+
+   renderNextLink(name);
 }
 
 resetBtn.addEventListener("click", () => {
