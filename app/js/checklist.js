@@ -106,7 +106,7 @@ const CHECKLISTS = {
     subtitle: "Engine shutdown for refuelling",
     items: [
       { label: "Throttle", action: "SET 1200 rpm" },
-      { label: "Magnetos", action: "Check" },
+      { label: "Magnetos", action: "CHECK" },
       { label: "Radios", action: "OFF" },
       { label: "Mixture", action: "IDLE CUT OFF" },
       { label: "Magnetos", action: "OFF, KEY OUT" },
@@ -154,7 +154,7 @@ function qs(name) {
   return new URLSearchParams(window.location.search).get(name);
 }
 
-function createItem({ label, action }) {
+function createItem({ label, action }, checklistName, itemIndex) {
   const row = document.createElement("div");
   row.className = "item";
 
@@ -174,7 +174,14 @@ function createItem({ label, action }) {
     row.classList.toggle("done", checkbox.checked);
   }
 
-  checkbox.addEventListener("change", sync);
+  checkbox.addEventListener("change", () => {
+    sync();
+    // Save state to localStorage
+    const key = `checklist_${checklistName}`;
+    const state = JSON.parse(localStorage.getItem(key) || '{}');
+    state[itemIndex] = checkbox.checked;
+    localStorage.setItem(key, JSON.stringify(state));
+  });
 
   // Tap anywhere on row toggles checkbox
   row.addEventListener("click", (e) => {
@@ -212,6 +219,17 @@ function renderNextLink(currentName) {
     return;
   }
 
+  // Special case: fuelling goes to shutdown with "from" parameter
+  if (currentName === "fuelling") {
+    wrap.innerHTML = `
+      <a class="card" href="checklist.html?name=shutdown&from=fuelling">
+        <strong>Next: Shutdown</strong><br/>
+        <small>Secure the aircraft</small>
+      </a>
+    `;
+    return;
+  }
+
   const nextName = CHECKLIST_SEQUENCE[idx + 1];
   if (!nextName || !CHECKLISTS[nextName]) {
     // End of sequence: show nothing (or show "Back to checklists" if you want)
@@ -234,6 +252,7 @@ function renderNextLink(currentName) {
    ========================= */
 
 const name = qs("name");
+const from = qs("from");
 const checklist = CHECKLISTS[name];
 
 const titleEl = document.getElementById("title");
@@ -249,9 +268,42 @@ if (!checklist) {
   titleEl.textContent = checklist.title;
   subtitleEl.textContent = checklist.subtitle;
 
-  checklist.items.forEach(item => {
-    listEl.appendChild(createItem(item));
+  // Create checklist items
+  checklist.items.forEach((item, index) => {
+    listEl.appendChild(createItem(item, name, index));
   });
+
+  // If on shutdown and came from fuelling, pre-tick common items (3-10)
+  if (name === "shutdown" && from === "fuelling") {
+    const fuellingState = JSON.parse(localStorage.getItem('checklist_fuelling') || '{}');
+    const checkboxes = listEl.querySelectorAll("input[type='checkbox']");
+
+    // Mapping: fuelling items to shutdown items (3-10, indices 2-9)
+    // Fuelling[0] (Throttle) -> Shutdown[2]
+    // Fuelling[1] (Magnetos CHECK) -> Shutdown[3]
+    // Fuelling[2] (Radios) -> Shutdown[4]
+    // Fuelling[3] (Mixture) -> Shutdown[5]
+    // Fuelling[4] (Magnetos OFF) -> Shutdown[6]
+    // Fuelling[5] (Master switch) -> Shutdown[8]
+    // Fuelling[6] (Fuel) -> Shutdown[9]
+
+    const mapping = {
+      0: 2,  // Throttle
+      1: 3,  // Magnetos CHECK
+      2: 4,  // Radios
+      3: 5,  // Mixture
+      4: 6,  // Magnetos OFF
+      5: 8,  // Master switch
+      6: 9   // Fuel
+    };
+
+    Object.entries(mapping).forEach(([fuelIdx, shutdownIdx]) => {
+      if (fuellingState[fuelIdx]) {
+        checkboxes[shutdownIdx].checked = true;
+        checkboxes[shutdownIdx].dispatchEvent(new Event("change"));
+      }
+    });
+  }
 
    renderNextLink(name);
 }
