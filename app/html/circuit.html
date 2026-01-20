@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Circuit Pattern Headings</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="../css/app.css">
+</head>
+<body>
+  <a href="../index.html">← Back</a>
+  <h1>Circuit Pattern Headings</h1>
+  <div class="hint">Calculate headings for crosswind, downwind & base legs with wind correction.</div>
+
+  <div class="row">
+    <div class="panel">
+      <h3>Runway & Circuit</h3>
+      <label>Runway heading (°)</label>
+      <input id="rwHeading" type="number" step="1" min="0" max="360" placeholder="e.g. 270">
+
+      <label>Circuit pattern</label>
+      <select id="pattern">
+        <option value="left">Left-handed</option>
+        <option value="right">Right-handed</option>
+      </select>
+    </div>
+
+    <div class="panel">
+      <h3>Wind</h3>
+      <label>Wind direction (°)</label>
+      <input id="windDir" type="number" step="1" min="0" max="360" placeholder="e.g. 240">
+
+      <label>Wind speed (kts)</label>
+      <input id="windSpeed" type="number" step="1" min="0" placeholder="e.g. 15">
+    </div>
+
+    <div class="panel point">
+      <h3>Planned speeds</h3>
+      <label>Crosswind leg (kts)</label>
+      <input id="speedCrosswind" type="number" step="1" min="0" placeholder="e.g. 70">
+
+      <label>Downwind leg (kts)</label>
+      <input id="speedDownwind" type="number" step="1" min="0" placeholder="e.g. 75">
+
+      <label>Base leg (kts)</label>
+      <input id="speedBase" type="number" step="1" min="0" placeholder="e.g. 70">
+
+      <button id="compute">Calculate headings</button>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="panel">
+      <h3>Crosswind</h3>
+      <div class="resultBox">
+        <div class="radialValue" id="crosswindHeading">—°</div>
+        <div class="radialLabel">Heading to fly</div>
+        <div class="smallMeta" id="crosswindMeta"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Downwind</h3>
+      <div class="resultBox">
+        <div class="radialValue" id="downwindHeading">—°</div>
+        <div class="radialLabel">Heading to fly</div>
+        <div class="smallMeta" id="downwindMeta"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Base</h3>
+      <div class="resultBox">
+        <div class="radialValue" id="baseHeading">—°</div>
+        <div class="radialLabel">Heading to fly</div>
+        <div class="smallMeta" id="baseMeta"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/circuit.js"></script>
+</body>
+</html>
