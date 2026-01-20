@@ -101,6 +101,20 @@ const CHECKLISTS = {
     ]
   },
 
+  fuelling: {
+    title: "Fuelling",
+    subtitle: "Engine shutdown for refuelling",
+    items: [
+      { label: "Throttle", action: "SET 1200 rpm" },
+      { label: "Magnetos", action: "Check" },
+      { label: "Radios", action: "OFF" },
+      { label: "Mixture", action: "IDLE CUT OFF" },
+      { label: "Magnetos", action: "OFF, KEY OUT" },
+      { label: "Master switch", action: "OFF" },
+      { label: "Fuel", action: "OFF" }
+    ]
+  },
+
   shutdown: {
     title: "Shutdown",
     subtitle: "Secure aircraft",
@@ -128,6 +142,7 @@ const CHECKLIST_SEQUENCE = [
   "power_checks",
   "pre_takeoff",
   "after_landing",
+  "fuelling",
   "shutdown"
 ];
 
@@ -179,6 +194,21 @@ function renderNextLink(currentName) {
   const idx = CHECKLIST_SEQUENCE.indexOf(currentName);
   if (idx === -1) {
     wrap.innerHTML = "";
+    return;
+  }
+
+  // Special case: after_landing has two next options (fuelling or shutdown)
+  if (currentName === "after_landing") {
+    wrap.innerHTML = `
+      <a class="card" href="checklist.html?name=fuelling">
+        <strong>Next: Fuelling</strong><br/>
+        <small>Shutdown for refuelling</small>
+      </a>
+      <a class="card" href="checklist.html?name=shutdown">
+        <strong>Next: Shutdown</strong><br/>
+        <small>Secure the aircraft</small>
+      </a>
+    `;
     return;
   }
 
